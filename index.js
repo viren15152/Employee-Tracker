@@ -1,10 +1,10 @@
 require('dotenv').config();
 
-// This section of my code allows me to import the inquirer and mysql modules into my JavaScript file. 
+// This section of my code allows me to import the inquirer and mysql modules into my JavaScript file.
 const inquirer = require('inquirer');
-const mysql = require('mysql12/promise');
+const mysql = require('mysql2/promise'); // Fix: Correct the module name
 
-//This section of my code will allow for my database connection configuration 
+// This section of my code will allow for my database connection configuration
 const dbConfig = {
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
@@ -12,7 +12,7 @@ const dbConfig = {
     database: process.env.DB_NAME,
 };
 
-//This section of my code is my function to view all roles 
+// This section of my code is my function to view all roles
 async function viewRoles() {
     const connection = await mysql.createConnection(dbConfig);
     const [rows, fields] = await connection.execute('SELECT * FROM role');
@@ -20,7 +20,7 @@ async function viewRoles() {
     connection.end();
 }
 
-//This is my function to view all employees 
+// This is my function to view all employees
 async function viewEmployees() {
     const connection = await mysql.createConnection(dbConfig);
     const [rows, fields] = await connection.execute('SELECT * FROM employee');
@@ -28,92 +28,89 @@ async function viewEmployees() {
     connection.end();
 }
 
-//This is my function to add role 
+// This is my function to add a role
 async function addRole() {
     const connection = await mysql.createConnection(dbConfig);
 
     try {
         const roleData = await inquirer.prompt([
-        {
-            type: 'input',
-            name: 'title',
-            message: 'Enter the role title',
-        },
-        {
-            type: 'input',
-            name: 'salary',
-            message: 'Enter the role salary:',
+            {
+                type: 'input',
+                name: 'title',
+                message: 'Enter the role title',
+            },
+            {
+                type: 'input',
+                name: 'salary',
+                message: 'Enter the role salary:',
+            },
+            {
+                type: 'input',
+                name: 'department_id',
+                message: 'Enter the department ID for the role:',
+            },
+        ]);
 
-        },
-        {
-            type: 'input',
-            name: 'department_id',
-            message: 'Enter the department ID for the role:',
-        },
-    
-]);
+        const [rows, fields] = await connection.execute(
+            'INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)',
+            [roleData.title, roleData.salary, roleData.department_id]
+        );
 
-const [rows, fields] = await connection.execute(
-    'INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)',
-    [roleData.title, roleData.salary, roleData.department_id]
-
-);
-
-console.log(`Role "${roleData.title}" added with ID ${rows.insertId}`);
-} catch (error) {
-    console.error('Error adding role:', error);
-  } finally {
-    connection.end();
-  }
-}
-
-//This section of my code is a function to add an Employee. 
-async function addEmployee() {
-    const connection = await mysql.createConnection(dbConfig);
-
-    try {
-        const employeeData = await inquirer.prompt([
-        {
-            type: 'input',
-            name: 'first_name',
-            message: 'Enter the employee\'s last name:',
-        },    
-        {
-            type: 'input',
-            name: 'last_name',
-            message: 'Enter the employee\'s last name:',
-        },
-        {
-            type: 'input',
-            name: 'role_id',
-            message: 'Enter the role ID for the employee:',
-        },
-        {
-            type: 'input',
-            name: 'manager_id',
-            message: 'Enter the manager ID for the employee (or leave blank for no manager):',
-        },
-    ]);
-
-    const [rows, fields] = await connection.execute(
-        'INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)',
-        [employeeData.first_name, employeeData.last_name, employeeData.role_id, employeeData.manager_id || null]
-    );
-
-    console.log(`Employee "${employeeData.first_name} ${employeeData.last_name}" added with ID ${rows.insertId}`);
+        console.log(`Role "${roleData.title}" added with ID ${rows.insertId}`);
     } catch (error) {
-      console.error('Error adding employee:', error);
+        console.error('Error adding role:', error);
     } finally {
         connection.end();
     }
 }
 
-// This section of my code will update an employee's role 
-async function updateEmployeeRole() {
-    const connection = await mysql.createConnection(dbconfig);
+// This section of my code is a function to add an Employee.
+async function addEmployee() {
+    const connection = await mysql.createConnection(dbConfig);
 
     try {
-        const emplyees = await connection.execute('SELECT * FROM employee');
+        const employeeData = await inquirer.prompt([
+            {
+                type: 'input',
+                name: 'first_name',
+                message: 'Enter the employee\'s first name:', // Fix: Update the prompt message
+            },
+            {
+                type: 'input',
+                name: 'last_name',
+                message: 'Enter the employee\'s last name:',
+            },
+            {
+                type: 'input',
+                name: 'role_id',
+                message: 'Enter the role ID for the employee:',
+            },
+            {
+                type: 'input',
+                name: 'manager_id',
+                message: 'Enter the manager ID for the employee (or leave blank for no manager):',
+            },
+        ]);
+
+        const [rows, fields] = await connection.execute(
+            'INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)',
+            [employeeData.first_name, employeeData.last_name, employeeData.role_id, employeeData.manager_id || null]
+        );
+
+        console.log(`Employee "${employeeData.first_name} ${employeeData.last_name}" added with ID ${rows.insertId}`);
+    } catch (error) {
+        console.error('Error adding employee:', error);
+    } finally {
+        connection.end();
+    }
+}
+
+// This section of my code will update an employee's role
+async function updateEmployeeRole() {
+    const connection = await mysql.createConnection(dbConfig);
+
+    try {
+        const employees = await connection.execute('SELECT * FROM employee');
         const roles = await connection.execute('SELECT * FROM role');
 
         const employeeChoices = employees[0].map((employee) => ({
@@ -121,7 +118,7 @@ async function updateEmployeeRole() {
             value: employee.id,
         }));
 
-        const roleChoices = role[0].map((role) => ({
+        const roleChoices = roles[0].map((role) => ({
             name: role.title,
             value: role.id,
         }));
@@ -138,7 +135,7 @@ async function updateEmployeeRole() {
                 name: 'new_role_id',
                 message: 'Select the new role for the employee:',
                 choices: roleChoices,
-            }
+            },
         ]);
 
         await connection.execute(
@@ -146,7 +143,7 @@ async function updateEmployeeRole() {
             [employeeToUpdate.new_role_id, employeeToUpdate.employee_id]
         );
 
-        console.log('Employee role updated sucessfully.');
+        console.log('Employee role updated successfully.');
     } catch (error) {
         console.error('Error updating employee role:', error);
     } finally {
@@ -154,8 +151,7 @@ async function updateEmployeeRole() {
     }
 }
 
-//This section of code defines a mainMenu function that presents a menu to the user using the inquirer library in Node.js
-
+// This section of code defines a mainMenu function that presents a menu to the user using the inquirer library in Node.js
 async function mainMenu() {
     const menuChoice = await inquirer.prompt({
         type: 'list',
@@ -170,7 +166,8 @@ async function mainMenu() {
             'Exit',
         ],
     });
-// This section of my code is a switch statement that handles user's choices from the main menu this will be executed after the user makes a selection.
+
+    // This section of my code is a switch statement that handles user's choices from the main menu; this will be executed after the user makes a selection.
     switch (menuChoice.action) {
         case 'View All Roles':
             await viewRoles();
@@ -196,3 +193,4 @@ async function mainMenu() {
 }
 
 mainMenu();
+
