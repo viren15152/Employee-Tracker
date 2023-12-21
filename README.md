@@ -33,7 +33,7 @@ https://drive.google.com/file/d/1mljJlRAAEfiCTefZGi2R85ymt_1Y6L-w/view
 ## Installation 
 1. Clone my github repository
 2. Open the project directory in VS code and enter npm install to install all the dependencies 
-3. You can then invoke the application by enter node index.js within the intergrated terminal 
+3. You can then invoke the application by entering node index.js within the intergrated terminal 
 
 ## Contributing
 
