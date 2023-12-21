@@ -15,7 +15,8 @@
 This is a command line application that allows users to add departments, roles and employees. It will also allow the user to view departments, roles and employees as well as update employees. 
 
 ## Visuals
-![Application within terminal](<Screenshot 2023-12-21 at 17.44.41.png>)
+
+![Application within CLI](<Screenshot 2023-12-21 at 17.59.27.png>)
 
 ## Technologies Used
 ![MySQL](https://img.shields.io/badge/mysql-%2300f.svg?style=for-the-badge&logo=mysql&logoColor=white)
