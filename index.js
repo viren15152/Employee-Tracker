@@ -30,7 +30,9 @@ async function viewEmployees() {
     const connection = await mysql.createConnection(dbConfig);
     try {
         const [rows, fields] = await connection.execute('SELECT * FROM employee');
-        console.table(rows);
+        rows.forEach((employee) => {
+            console.log(`Employee ID: ${employee.id}, Name: ${employee.first_name} ${employee.last_name}`);
+        });
     } catch (error) {
         console.error('Error viewing employees:', error);
     } finally {
