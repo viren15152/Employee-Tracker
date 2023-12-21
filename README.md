@@ -18,6 +18,8 @@ This is a command line application that allows users to add departments, roles a
 
 ![Application within CLI](<Screenshot 2023-12-21 at 17.59.27.png>)
 
+https://drive.google.com/file/d/1mljJlRAAEfiCTefZGi2R85ymt_1Y6L-w/view
+
 ## Technologies Used
 ![MySQL](https://img.shields.io/badge/mysql-%2300f.svg?style=for-the-badge&logo=mysql&logoColor=white)
 ![NodeJS](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white)
