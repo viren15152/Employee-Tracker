@@ -1,10 +1,10 @@
 require('dotenv').config();
 
-// This section of my code allows me to import the inquirer and mysql modules into my JavaScript file.
+// Import necessary modules
 const inquirer = require('inquirer');
-const mysql = require('mysql2/promise'); // Fix: Correct the module name
+const mysql = require('mysql2/promise');
 
-// This section of my code will allow for my database connection configuration
+// Database connection configuration
 const dbConfig = {
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
@@ -12,32 +12,41 @@ const dbConfig = {
     database: process.env.DB_NAME,
 };
 
-// This section of my code is my function to view all roles
+// Function to view all roles
 async function viewRoles() {
     const connection = await mysql.createConnection(dbConfig);
-    const [rows, fields] = await connection.execute('SELECT * FROM role');
-    console.table(rows);
-    connection.end();
+    try {
+        const [rows, fields] = await connection.execute('SELECT * FROM role');
+        console.table(rows);
+    } catch (error) {
+        console.error('Error viewing roles:', error);
+    } finally {
+        connection.end();
+    }
 }
 
-// This is my function to view all employees
+// Function to view all employees
 async function viewEmployees() {
     const connection = await mysql.createConnection(dbConfig);
-    const [rows, fields] = await connection.execute('SELECT * FROM employee');
-    console.table(rows);
-    connection.end();
+    try {
+        const [rows, fields] = await connection.execute('SELECT * FROM employee');
+        console.table(rows);
+    } catch (error) {
+        console.error('Error viewing employees:', error);
+    } finally {
+        connection.end();
+    }
 }
 
-// This is my function to add a role
+// Function to add a role
 async function addRole() {
     const connection = await mysql.createConnection(dbConfig);
-
     try {
         const roleData = await inquirer.prompt([
             {
                 type: 'input',
                 name: 'title',
-                message: 'Enter the role title',
+                message: 'Enter the role title:',
             },
             {
                 type: 'input',
@@ -64,16 +73,15 @@ async function addRole() {
     }
 }
 
-// This section of my code is a function to add an Employee.
+// Function to add an Employee
 async function addEmployee() {
     const connection = await mysql.createConnection(dbConfig);
-
     try {
         const employeeData = await inquirer.prompt([
             {
                 type: 'input',
                 name: 'first_name',
-                message: 'Enter the employee\'s first name:', // Fix: Update the prompt message
+                message: 'Enter the employee\'s first name:',
             },
             {
                 type: 'input',
@@ -105,10 +113,9 @@ async function addEmployee() {
     }
 }
 
-// This section of my code will update an employee's role
+// Function to update an employee's role
 async function updateEmployeeRole() {
     const connection = await mysql.createConnection(dbConfig);
-
     try {
         const employees = await connection.execute('SELECT * FROM employee');
         const roles = await connection.execute('SELECT * FROM role');
@@ -127,7 +134,7 @@ async function updateEmployeeRole() {
             {
                 type: 'list',
                 name: 'employee_id',
-                message: 'Select the employee to update',
+                message: 'Select the employee to update:',
                 choices: employeeChoices,
             },
             {
@@ -150,8 +157,57 @@ async function updateEmployeeRole() {
         connection.end();
     }
 }
+// Function to view all departments
+async function viewDepartments() {
+    const connection = await mysql.createConnection(dbConfig);
+    try {
+       
+        const [rows, fields] = await connection.execute('SELECT * FROM department');
+        console.table(rows);
+    } catch (error) {
+        console.error('Error viewing departments:', error);
+    } finally {
+        connection.end();
+    }
+}
+// Function to add a department
+async function addDepartment() {
+    const connection = await mysql.createConnection(dbConfig);
+    try {
+        const departmentData = await inquirer.prompt([
+            {
+                type: 'input',
+                name: 'name',
+                message: 'Enter the department name:',
+            },
+        ]);
 
-// This section of code defines a mainMenu function that presents a menu to the user using the inquirer library in Node.js
+        const [rows, fields] = await connection.execute(
+            'INSERT INTO department (name) VALUES (?)',
+            [departmentData.name]
+        );
+
+        console.log(`Department "${departmentData.name}" added with ID ${rows.insertId}`);
+    } catch (error) {
+        console.error('Error adding department:', error);
+    } finally {
+        connection.end();
+    }
+}
+
+// Function to view employees by department
+async function viewEmployeesByDepartment() {
+    const connection = await mysql.createConnection(dbConfig);
+    try {
+        // Implement logic to view employees by department
+    } catch (error) {
+        console.error('Error viewing employees by department:', error);
+    } finally {
+        connection.end();
+    }
+}
+
+// Main menu
 async function mainMenu() {
     const menuChoice = await inquirer.prompt({
         type: 'list',
@@ -163,11 +219,13 @@ async function mainMenu() {
             'Add Role',
             'Add Employee',
             'Update Employee Role',
+            'View All Departments',
+            'Add Department',
+            'View Employees by Department',
             'Exit',
         ],
     });
 
-    // This section of my code is a switch statement that handles user's choices from the main menu; this will be executed after the user makes a selection.
     switch (menuChoice.action) {
         case 'View All Roles':
             await viewRoles();
@@ -184,13 +242,27 @@ async function mainMenu() {
         case 'Update Employee Role':
             await updateEmployeeRole();
             break;
+        case 'View All Departments':
+            await viewDepartments();
+            break;
+        case 'Add Department':
+            await addDepartment();
+            break;
+        case 'View Employees by Department':
+            await viewEmployeesByDepartment();
+            break;
         case 'Exit':
             console.log('Exiting application.');
             process.exit();
     }
 
+    // After completing the chosen action, return to the main menu
     mainMenu();
 }
 
+// Start the application
 mainMenu();
+
+
+
 
