@@ -106,5 +106,93 @@ async function addEmployee() {
     } finally {
         connection.end();
     }
-}    
+}
 
+// This section of my code will update an employee's role 
+async function updateEmployeeRole() {
+    const connection = await mysql.createConnection(dbconfig);
+
+    try {
+        const emplyees = await connection.execute('SELECT * FROM employee');
+        const roles = await connection.execute('SELECT * FROM role');
+
+        const employeeChoices = employees[0].map((employee) => ({
+            name: `${employee.first_name} ${employee.last_name}`,
+            value: employee.id,
+        }));
+
+        const roleChoices = role[0].map((role) => ({
+            name: role.title,
+            value: role.id,
+        }));
+
+        const employeeToUpdate = await inquirer.prompt([
+            {
+                type: 'list',
+                name: 'employee_id',
+                message: 'Select the employee to update',
+                choices: employeeChoices,
+            },
+            {
+                type: 'list',
+                name: 'new_role_id',
+                message: 'Select the new role for the employee:',
+                choices: roleChoices,
+            }
+        ]);
+
+        await connection.execute(
+            'UPDATE employee SET role_id = ? WHERE id = ?',
+            [employeeToUpdate.new_role_id, employeeToUpdate.employee_id]
+        );
+
+        console.log('Employee role updated sucessfully.');
+    } catch (error) {
+        console.error('Error updating employee role:', error);
+    } finally {
+        connection.end();
+    }
+}
+
+//This section of code defines a mainMenu function that presents a menu to the user using the inquirer library in Node.js
+
+async function mainMenu() {
+    const menuChoice = await inquirer.prompt({
+        type: 'list',
+        name: 'action',
+        message: 'Choose an action:',
+        choices: [
+            'View All Roles',
+            'View All Employees',
+            'Add Role',
+            'Add Employee',
+            'Update Employee Role',
+            'Exit',
+        ],
+    });
+// This section of my code is a switch statement that handles user's choices from the main menu this will be executed after the user makes a selection.
+    switch (menuChoice.action) {
+        case 'View All Roles':
+            await viewRoles();
+            break;
+        case 'View All Employees':
+            await viewEmployees();
+            break;
+        case 'Add Role':
+            await addRole();
+            break;
+        case 'Add Employee':
+            await addEmployee();
+            break;
+        case 'Update Employee Role':
+            await updateEmployeeRole();
+            break;
+        case 'Exit':
+            console.log('Exiting application.');
+            process.exit();
+    }
+
+    mainMenu();
+}
+
+mainMenu();
