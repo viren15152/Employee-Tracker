@@ -74,11 +74,15 @@ async function addRole() {
         connection.end();
     }
 }
-
 // Function to add an Employee
 async function addEmployee() {
     const connection = await mysql.createConnection(dbConfig);
+
     try {
+        // Fetch existing roles
+        const [roles] = await connection.execute('SELECT id, title FROM role');
+        const roleChoices = roles.map(role => ({ name: role.title, value: role.id }));
+
         const employeeData = await inquirer.prompt([
             {
                 type: 'input',
@@ -91,9 +95,10 @@ async function addEmployee() {
                 message: 'Enter the employee\'s last name:',
             },
             {
-                type: 'input',
+                type: 'list',
                 name: 'role_id',
-                message: 'Enter the role ID for the employee:',
+                message: 'Select the role for the employee:',
+                choices: roleChoices,
             },
             {
                 type: 'input',
@@ -114,7 +119,6 @@ async function addEmployee() {
         connection.end();
     }
 }
-
 // Function to update an employee's role
 async function updateEmployeeRole() {
     const connection = await mysql.createConnection(dbConfig);
